@@ -8,7 +8,7 @@
 
 ### Specify Number of Days
 
-For e.g. 10 days:
+For e.g. 10 days: 
 
 ```
 ./gradlew -q text --args 10
