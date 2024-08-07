@@ -1,62 +1,97 @@
 package com.gildedrose;
 
 class GildedRose {
-    Item[] items;
+	private static final int MIN_QUALITY = 0;
+	private static final int MAX_QUALITY = 50;
+	private static final String SULFURAS_HAND_OF_RAGNAROS = "Sulfuras, Hand of Ragnaros";
+	private static final String BACKSTAGE_PASSES_TO_A_TAFKAL80ETC_CONCERT = "Backstage passes to a TAFKAL80ETC concert";
+	private static final String AGED_BRIE = "Aged Brie";
+	private static final String CONJURED = "Conjured Mana Cake";
 
-    public GildedRose(Item[] items) {
-        this.items = items;
-    }
+	private Item[] items;
 
-    public void updateQuality() {
-        for (int i = 0; i < items.length; i++) {
-            if (!items[i].name.equals("Aged Brie")
-                    && !items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                if (items[i].quality > 0) {
-                    if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                        items[i].quality = items[i].quality - 1;
-                    }
-                }
-            } else {
-                if (items[i].quality < 50) {
-                    items[i].quality = items[i].quality + 1;
+	public Item[] getItems() {
+		return items;
+	}
 
-                    if (items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].sellIn < 11) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
+	public GildedRose(Item[] items) {
+		this.items = items;
+	}
 
-                        if (items[i].sellIn < 6) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-                    }
-                }
-            }
+	public void updateQuality() {
+		for (Item item : items) {
+			// never has to be sold or decreases in Quality
+			if (SULFURAS_HAND_OF_RAGNAROS.equals(item.name)) {
+				continue;
+			}
 
-            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                items[i].sellIn = items[i].sellIn - 1;
-            }
+			item.sellIn = item.sellIn - 1;
 
-            if (items[i].sellIn < 0) {
-                if (!items[i].name.equals("Aged Brie")) {
-                    if (!items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].quality > 0) {
-                            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                                items[i].quality = items[i].quality - 1;
-                            }
-                        }
-                    } else {
-                        items[i].quality = items[i].quality - items[i].quality;
-                    }
-                } else {
-                    if (items[i].quality < 50) {
-                        items[i].quality = items[i].quality + 1;
-                    }
-                }
-            }
-        }
-    }
+			if (BACKSTAGE_PASSES_TO_A_TAFKAL80ETC_CONCERT.equals(item.name)) {
+				updateBackstage(item);
+			} else if (AGED_BRIE.equals(item.name)) {
+				updateAgedBrie(item);
+			} else if (CONJURED.equals(item.name) && item.quality > MIN_QUALITY) {
+				updateConjured(item);
+			} else if (item.quality > MIN_QUALITY) {
+				updateStandard(item);
+			}
+
+		}
+	}
+
+	private void updateConjured(Item item) {
+		item.quality = item.quality - 2; // Decrease twice as fast
+
+		if (item.sellIn < 0 && item.quality > MIN_QUALITY) {
+			item.quality = item.quality - 2; // Decrease twice as fast after sellIn date
+		}
+
+		if (item.quality < 0) {
+			item.quality = 0; // Ensure quality is not negative
+		}
+	}
+
+	private void updateBackstage(Item item) {
+		if (item.quality < MAX_QUALITY) {
+			item.quality = item.quality + 1;
+
+			// decrease by 2
+			if (item.sellIn < 10) {
+				inscreaseQuality(item);
+			}
+			// decrease by 3
+			if (item.sellIn < 5) {
+				inscreaseQuality(item);
+			}
+		}
+
+		if (item.sellIn < 0) {
+			item.quality = 0;
+
+		}
+	}
+
+	private void inscreaseQuality(Item item) {
+		if (item.quality < MAX_QUALITY) {
+			item.quality = item.quality + 1;
+		}
+	}
+
+	private void updateStandard(Item item) {
+		item.quality = item.quality - 1;
+
+		if (item.sellIn < 0 && item.quality > MIN_QUALITY) {
+			item.quality = item.quality - 1;
+		}
+
+	}
+
+	private void updateAgedBrie(Item item) {
+		inscreaseQuality(item);
+
+		if (item.sellIn < 0 && item.quality < MAX_QUALITY) {
+			item.quality = item.quality + 1;
+		}
+	}
 }
