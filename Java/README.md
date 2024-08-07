@@ -3,7 +3,7 @@
 ## Run the TextTest Fixture from Command-Line
 
 ```
-./gradlew -q text
+./gradlew -q text  
 ```
 
 ### Specify Number of Days
